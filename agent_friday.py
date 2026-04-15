@@ -22,7 +22,7 @@ from livekit.agents.voice import Agent, AgentSession
 from livekit.agents.llm import mcp
 
 # Plugins
-from livekit.plugins import google as lk_google, openai as lk_openai, groq as lk_groq, sarvam, silero
+from livekit.plugins import google as lk_google, openai as lk_openai, groq as lk_groq, deepgram as lk_deepgram, sarvam, silero
 
 # ---------------------------------------------------------------------------
 # CONFIG
@@ -30,7 +30,7 @@ from livekit.plugins import google as lk_google, openai as lk_openai, groq as lk
 
 STT_PROVIDER       = "sarvam"
 LLM_PROVIDER       = "groq"
-TTS_PROVIDER       = "sarvam"
+TTS_PROVIDER       = "deepgram"
 
 GEMINI_LLM_MODEL   = "gemini-2.0-flash"
 OPENAI_LLM_MODEL   = "gpt-4o"
@@ -216,7 +216,10 @@ def _build_llm():
 
 
 def _build_tts():
-    if TTS_PROVIDER == "sarvam":
+    if TTS_PROVIDER == "deepgram":
+        logger.info("TTS → Deepgram Aura")
+        return lk_deepgram.TTS(model="aura-2-andromeda-en", encoding="linear16")
+    elif TTS_PROVIDER == "sarvam":
         logger.info("TTS → Sarvam %s / %s", SARVAM_TTS_MODEL, SARVAM_TTS_SPEAKER)
         return sarvam.TTS(
             target_language_code=SARVAM_TTS_LANGUAGE,
