@@ -1,0 +1,39 @@
+dows PowerShell
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+Install the latest PowerShell for new features and improvements! https://aka.ms/PSWindows
+
+PS C:\Users\lylam\Documents\GitHub\ai-assistant-home> winget install ngrok
+Multiple packages found matching input criteria. Please refine the input.
+Name  Id           Source
+--------------------------
+ngrok 9MVS1J51GMK6 msstore
+Ngrok Ngrok.Ngrok  winget
+PS C:\Users\lylam\Documents\GitHub\ai-assistant-home> ngrok config add-authtoken $YOUR_AUTHTOKEN
+ngrok : The term 'ngrok' is not recognized as the name of a cmdlet, function, script file, or operable program. Check
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:1
++ ngrok config add-authtoken $YOUR_AUTHTOKEN
++ ~~~~~
+    + CategoryInfo          : ObjectNotFound: (ngrok:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Users\lylam\Documents\GitHub\ai-assistant-home> ngrok config add-authtoken 3CNWIBtU4aZzaICOKJmgf48ypCQ_88fbWAMf31ijpHzn8hGrP
+ngrok : The term 'ngrok' is not recognized as the name of a cmdlet, function, script file, or operable program. Check
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:1
++ ngrok config add-authtoken 3CNWIBtU4aZzaICOKJmgf48ypCQ_88fbWAMf31ijpH ...
++ ~~~~~
+    + CategoryInfo          : ObjectNotFound: (ngrok:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Users\lylam\Documents\GitHub\ai-assistant-home> ngrok config add-authtoken 3CNWIBtU4aZzaICOKJmgf48ypCQ_88fbWAMf31ijpHzn8hGrP
+ngrok : The term 'ngrok' is not recognized as the name of a cmdlet, function, script file, or operable program. Check
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:1
++ ngrok config add-authtoken 3CNWIBtU4aZzaICOKJmgf48ypCQ_88fbWAMf31ijpH ...
++ ~~~~~
+    + CategoryInfo          : ObjectNotFound: (ngrok:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Users\lylam\Documents\GitHub\ai-assistant-home>
