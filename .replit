@@ -55,4 +55,4 @@ run = ["uv", "run", "friday"]
 [userenv]
 
 [userenv.shared]
-MCP_SERVER_URL = "https://closely-encryption-passive-finest.trycloudflare.com/sse"
+MCP_SERVER_URL = "https://gorged-vitamins-decimal.ngrok-free.dev/sse"
