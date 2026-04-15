@@ -17,6 +17,8 @@ mcp = FastMCP(
         "You have access to a set of tools to help the user. "
         "Be concise, accurate, and a little witty."
     ),
+    host="0.0.0.0",
+    port=8000,
 )
 
 # Register tools, prompts, and resources
