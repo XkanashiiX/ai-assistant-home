@@ -28,7 +28,7 @@ from livekit.plugins import google as lk_google, openai as lk_openai, groq as lk
 # CONFIG
 # ---------------------------------------------------------------------------
 
-STT_PROVIDER       = "sarvam"
+STT_PROVIDER       = "deepgram"
 LLM_PROVIDER       = "groq"
 TTS_PROVIDER       = "deepgram"
 
@@ -185,7 +185,10 @@ def _mcp_server_url() -> str:
 # ---------------------------------------------------------------------------
 
 def _build_stt():
-    if STT_PROVIDER == "sarvam":
+    if STT_PROVIDER == "deepgram":
+        logger.info("STT → Deepgram Nova-2")
+        return lk_deepgram.STT(model="nova-2", language="en")
+    elif STT_PROVIDER == "sarvam":
         logger.info("STT → Sarvam Saaras v3")
         return sarvam.STT(
             language="unknown",
@@ -275,11 +278,11 @@ class FridayAgent(Agent):
 # ---------------------------------------------------------------------------
 
 def _turn_detection() -> str:
-    return "stt" if STT_PROVIDER == "sarvam" else "vad"
+    return "stt" if STT_PROVIDER in ("sarvam", "deepgram") else "vad"
 
 
 def _endpointing_delay() -> float:
-    return {"sarvam": 0.07, "whisper": 0.3}.get(STT_PROVIDER, 0.1)
+    return {"deepgram": 0.05, "sarvam": 0.07, "whisper": 0.3}.get(STT_PROVIDER, 0.1)
 
 
 async def entrypoint(ctx: JobContext) -> None:
