@@ -20,12 +20,12 @@ from livekit.plugins import google as lk_google, openai as lk_openai, groq as lk
 # CONFIG
 # ---------------------------------------------------------------------------
 
-STT_PROVIDER    = "deepgram"
-LLM_PROVIDER    = "groq"
-TTS_PROVIDER    = "deepgram"
+STT_PROVIDER      = "deepgram"
+LLM_PROVIDER      = "gemini"
+TTS_PROVIDER      = "deepgram"
 
-GROQ_LLM_MODEL  = "llama-3.3-70b-versatile"   # 70b for reliable function calling
-MCP_SERVER_PORT = 8000
+GEMINI_LLM_MODEL  = "gemini-2.5-flash"
+MCP_SERVER_PORT   = 8000
 
 # ---------------------------------------------------------------------------
 # System prompt
@@ -81,9 +81,9 @@ def _build_stt():
 
 
 def _build_llm():
-    logger.info("LLM → Groq (%s)", GROQ_LLM_MODEL)
-    return lk_groq.LLM(
-        model=GROQ_LLM_MODEL,
+    logger.info("LLM → Gemini (%s)", GEMINI_LLM_MODEL)
+    return lk_google.LLM(
+        model=GEMINI_LLM_MODEL,
         temperature=0.6,
     )
 
