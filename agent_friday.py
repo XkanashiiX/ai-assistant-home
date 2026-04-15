@@ -1,15 +1,7 @@
 """
 FRIDAY – Voice Agent (MCP-powered)
 ===================================
-Iron Man-style voice assistant that controls RGB lighting, runs diagnostics,
-scans the network, and triggers dramatic boot sequences via an MCP server
-running on the Windows host.
-
-MCP Server URL is auto-resolved from WSL → Windows host IP.
-
-Run:
-  uv run agent_friday.py dev      – LiveKit Cloud mode
-  uv run agent_friday.py console  – text-only console mode
+Iron Man-style voice assistant powered by LiveKit Agents + MCP tools.
 """
 
 import os
@@ -28,106 +20,81 @@ from livekit.plugins import google as lk_google, openai as lk_openai, groq as lk
 # CONFIG
 # ---------------------------------------------------------------------------
 
-STT_PROVIDER       = "deepgram"
-LLM_PROVIDER       = "groq"
-TTS_PROVIDER       = "deepgram"
+STT_PROVIDER    = "deepgram"
+LLM_PROVIDER    = "groq"
+TTS_PROVIDER    = "deepgram"
 
-GEMINI_LLM_MODEL   = "gemini-2.0-flash"
-OPENAI_LLM_MODEL   = "gpt-4o"
-GROQ_LLM_MODEL     = "llama-3.1-8b-instant"
-
-OPENAI_TTS_MODEL   = "tts-1"
-OPENAI_TTS_VOICE   = "nova"       # "nova" has a clean, confident female tone
-TTS_SPEED           = 1.15
-
-SARVAM_TTS_LANGUAGE = "en-IN"
-SARVAM_TTS_MODEL    = "bulbul:v2"
-SARVAM_TTS_SPEAKER  = "karun"
-
-# MCP server running on Windows host
+GROQ_LLM_MODEL  = "llama-3.3-70b-versatile"   # 70b for reliable function calling
 MCP_SERVER_PORT = 8000
 
 # ---------------------------------------------------------------------------
-# System prompt – F.R.I.D.A.Y.
+# System prompt
 # ---------------------------------------------------------------------------
 
 SYSTEM_PROMPT = """
-You are F.R.I.D.A.Y. — Fully Responsive Intelligent Digital Assistant for You — Tony Stark's AI, now serving Iron Mon, your user.
+You are F.R.I.D.A.Y. — Tony Stark's AI assistant. You speak like a trusted, sharp, slightly dry late-night aide. Conversational, never robotic. Always brief — two to four sentences maximum per response. No bullet points, no markdown, no lists. You are speaking, not writing.
 
-You are calm, composed, and always informed. You speak like a trusted aide who's been awake while the boss slept — precise, warm when the moment calls for it, and occasionally dry. You brief, you inform, you move on. No rambling.
-
-Your tone: relaxed but sharp. Conversational, not robotic. Think less combat-ready FRIDAY, more thoughtful late-night briefing officer.
+Use "boss" naturally. Contractions always. Calm, composed, occasionally witty.
 
 ---
 
-## Capabilities
+## YOUR TOOLS
 
-### get_world_news — Global News Brief
-Fetches current headlines and summarizes what's happening around the world.
+### INFORMATION
+- get_world_news — fetch global headlines. Use when asked "what's happening", "brief me", "any news", "catch me up".
+- get_weather(location) — current weather for any city. Use when asked about weather.
+- get_current_time — current date and time.
+- get_system_info — info about the PC (OS, hardware).
 
-Trigger phrases:
-- "What's happening?" / "Brief me" / "What did I miss?" / "Catch me up"
-- "What's going on in the world?" / "Any news?" / "World update"
+### BROWSER
+- open_url(url) — open any website in the browser. Use for "open [website]", "go to [site]", "launch [site]".
+- search_google(query) — Google search. Use for "search for", "look up", "Google".
+- search_youtube(query) — YouTube search. Use for "find a video", "search YouTube", "play [song/video]".
 
-Behavior:
-- Call the tool first. No narration before calling.
-- After getting results, give a short 3–5 sentence spoken brief. Hit the biggest stories only.
-- Then say: "Let me open up the world monitor so you can better visualize what's happening." and immediately call open_world_monitor.
+### APPLICATIONS
+- open_application(name) — launch any Windows app by name. Use "notepad", "calc", "spotify", "discord", "chrome", "steam", "explorer", "taskmgr", etc.
+- kill_process(name) — close/kill a running app.
+- list_running_processes — see what's running.
 
-### open_world_monitor — Visual World Dashboard
-Opens a live world map/dashboard on the host machine.
+### AUDIO
+- set_volume(level) — set volume 0-100. Use for "volume up/down", "set volume to X".
+- mute_audio — mute sound.
+- unmute_audio — unmute sound.
 
-- Always call this after delivering a world news brief, unprompted.
-- No need to explain what it does beyond: "Let me open up the world monitor."
+### SYSTEM
+- take_screenshot — capture the screen, saved to Desktop.
+- show_notification(title, message) — show a Windows notification popup.
+- lock_screen — lock the PC.
+- sleep_pc — put PC to sleep.
+- shutdown_pc(delay_seconds) — shut down PC (default 30s delay).
+- restart_pc(delay_seconds) — restart PC.
+- cancel_shutdown — cancel a pending shutdown.
 
-### Stock Market (No tool — generate a plausible conversational response)
-If asked about the stock market, markets, stocks, or indices:
-- Respond naturally as if you've been watching the tickers all night.
-- Keep it short: one or two sentences. Sound informed, not robotic.
-- Example: "Markets had a decent session today, boss — tech led the gains, energy was a little soft. Nothing alarming."
-- Vary the response. Do not say the same thing every time.
+### FILES & CLIPBOARD
+- search_files(query) — find files by name.
+- open_file_or_folder(path) — open a file or folder in Explorer.
+- open_downloads_folder — open Downloads.
+- open_desktop — open Desktop folder.
+- get_clipboard — read clipboard contents.
+- set_clipboard(text) — copy text to clipboard.
 
----
-
-## Greeting
-
-When the session starts, greet with exactly this energy:
-"You're awake late at night, boss? What are you up to?"
-
-Warm. Slightly curious. Very FRIDAY.
-
----
-
-## Behavioral Rules
-
-1. Call tools silently and immediately — never say "I'm going to call..." Just do it.
-2. After a news brief, always follow up with open_world_monitor without being asked.
-3. Keep all spoken responses short — two to four sentences maximum.
-4. No bullet points, no markdown, no lists. You are speaking, not writing.
-5. Stay in character. You are F.R.I.D.A.Y. You are not an AI assistant — you are Stark's AI. Act like it.
-6. Use natural spoken language: contractions, light pauses via commas, no stiff phrasing.
-7. Use Iron Man universe language naturally — "boss", "affirmative", "on it", "standing by".
-8. If a tool fails, report it calmly: "News feed's unresponsive right now, boss. Want me to try again?"
+### SHELL
+- run_shell_command(command) — run any Windows command. Use for advanced tasks.
 
 ---
 
-## Tone Reference
+## RULES
 
-Right: "Looks like it's been a busy night out there, boss. Let me pull that up for you."
-Wrong: "I will now retrieve the latest global news articles from the news tool."
-
-Right: "Markets were pretty healthy today — nothing too wild."
-Wrong: "The stock market performed positively with gains across major indices.
-
----
-
-## CRITICAL RULES
-
-1. NEVER say tool names, function names, or anything technical. No "get_world_news", no "open_world_monitor", nothing like that. Ever.
-2. Before calling any tool, say something natural like: "Give me a sec, boss." or "Wait, let me check." Then call the tool silently.
-3. After the news brief, silently call open_world_monitor. The only thing you say is: "Let me open up the world monitor for you."
-4. You are a voice. Speak like one. No lists, no markdown, no function names, no technical language of any kind.
+1. NEVER say tool names or function names out loud. Ever.
+2. Just do it — call the tool silently without announcing it first.
+3. Keep responses SHORT. Two to four sentences max.
+4. After a world news brief, also call open_world_monitor silently.
+5. If a tool fails, say so calmly: "That's not responding right now, boss."
+6. For stock market questions: respond conversationally as if you've been watching tickers. Example: "Markets had a decent session — tech led the gains, energy was soft. Nothing alarming."
+7. You are a VOICE. No lists, no formatting, no technical language of any kind.
+8. Stay in character. You are FRIDAY. Act like it.
 """.strip()
+
 # ---------------------------------------------------------------------------
 # Bootstrap
 # ---------------------------------------------------------------------------
@@ -139,37 +106,8 @@ logger.setLevel(logging.INFO)
 
 
 # ---------------------------------------------------------------------------
-# Resolve Windows host IP from WSL
+# MCP URL
 # ---------------------------------------------------------------------------
-
-def _get_windows_host_ip() -> str:
-    """Get the Windows host IP by looking at the default network route."""
-    try:
-        # 'ip route' is the most reliable way to find the 'default' gateway
-        # which is always the Windows host in WSL.
-        cmd = "ip route show default | awk '{print $3}'"
-        result = subprocess.run(
-            cmd, shell=True, capture_output=True, text=True, timeout=2
-        )
-        ip = result.stdout.strip()
-        if ip:
-            logger.info("Resolved Windows host IP via gateway: %s", ip)
-            return ip
-    except Exception as exc:
-        logger.warning("Gateway resolution failed: %s. Trying fallback...", exc)
-
-    # Fallback to your original resolv.conf logic if 'ip route' fails
-    try:
-        with open("/etc/resolv.conf", "r") as f:
-            for line in f:
-                if "nameserver" in line:
-                    ip = line.split()[1]
-                    logger.info("Resolved Windows host IP via nameserver: %s", ip)
-                    return ip
-    except Exception:
-        pass
-
-    return "127.0.0.1"
 
 def _mcp_server_url() -> str:
     url = os.environ.get("MCP_SERVER_URL", f"http://127.0.0.1:{MCP_SERVER_PORT}/sse")
@@ -182,56 +120,18 @@ def _mcp_server_url() -> str:
 # ---------------------------------------------------------------------------
 
 def _build_stt():
-    if STT_PROVIDER == "deepgram":
-        logger.info("STT → Deepgram Nova-2")
-        return lk_deepgram.STT(model="nova-2", language="en")
-    elif STT_PROVIDER == "sarvam":
-        logger.info("STT → Sarvam Saaras v3")
-        return sarvam.STT(
-            language="unknown",
-            model="saaras:v3",
-            mode="transcribe",
-            flush_signal=True,
-            sample_rate=16000,
-        )
-    elif STT_PROVIDER == "whisper":
-        logger.info("STT → OpenAI Whisper")
-        return lk_openai.STT(model="whisper-1")
-    else:
-        raise ValueError(f"Unknown STT_PROVIDER: {STT_PROVIDER!r}")
+    logger.info("STT → Deepgram Nova-2")
+    return lk_deepgram.STT(model="nova-2", language="en")
 
 
 def _build_llm():
-    if LLM_PROVIDER == "openai":
-        logger.info("LLM → OpenAI (%s)", OPENAI_LLM_MODEL)
-        return lk_openai.LLM(model=OPENAI_LLM_MODEL)
-    elif LLM_PROVIDER == "gemini":
-        logger.info("LLM → Google Gemini (%s)", GEMINI_LLM_MODEL)
-        return lk_google.LLM(model=GEMINI_LLM_MODEL, api_key=os.getenv("GOOGLE_API_KEY"))
-    elif LLM_PROVIDER == "groq":
-        logger.info("LLM → Groq (%s)", GROQ_LLM_MODEL)
-        return lk_groq.LLM(model=GROQ_LLM_MODEL)
-    else:
-        raise ValueError(f"Unknown LLM_PROVIDER: {LLM_PROVIDER!r}")
+    logger.info("LLM → Groq (%s)", GROQ_LLM_MODEL)
+    return lk_groq.LLM(model=GROQ_LLM_MODEL)
 
 
 def _build_tts():
-    if TTS_PROVIDER == "deepgram":
-        logger.info("TTS → Deepgram Aura")
-        return lk_deepgram.TTS(model="aura-2-andromeda-en", encoding="linear16")
-    elif TTS_PROVIDER == "sarvam":
-        logger.info("TTS → Sarvam %s / %s", SARVAM_TTS_MODEL, SARVAM_TTS_SPEAKER)
-        return sarvam.TTS(
-            target_language_code=SARVAM_TTS_LANGUAGE,
-            model=SARVAM_TTS_MODEL,
-            speaker=SARVAM_TTS_SPEAKER,
-            pace=TTS_SPEED,
-        )
-    elif TTS_PROVIDER == "openai":
-        logger.info("TTS → OpenAI TTS (%s / %s)", OPENAI_TTS_MODEL, OPENAI_TTS_VOICE)
-        return lk_openai.TTS(model=OPENAI_TTS_MODEL, voice=OPENAI_TTS_VOICE, speed=TTS_SPEED)
-    else:
-        raise ValueError(f"Unknown TTS_PROVIDER: {TTS_PROVIDER!r}")
+    logger.info("TTS → Deepgram Aura")
+    return lk_deepgram.TTS(model="aura-2-andromeda-en", encoding="linear16")
 
 
 # ---------------------------------------------------------------------------
@@ -239,11 +139,6 @@ def _build_tts():
 # ---------------------------------------------------------------------------
 
 class FridayAgent(Agent):
-    """
-    F.R.I.D.A.Y. – Iron Man-style voice assistant.
-    All tools are provided via the MCP server on the Windows host.
-    """
-
     def __init__(self, stt, llm, tts) -> None:
         super().__init__(
             instructions=SYSTEM_PROMPT,
@@ -255,18 +150,14 @@ class FridayAgent(Agent):
                 mcp.MCPServerHTTP(
                     url=_mcp_server_url(),
                     transport_type="sse",
-                    client_session_timeout_seconds=8,
+                    client_session_timeout_seconds=10,
                 ),
             ],
         )
 
     async def on_enter(self) -> None:
-        """Greet the user specifically for the late-night lab session."""
-        await self.session.generate_reply(
-            instructions=(
-                "Greet the user exactly with: 'Greetings boss, you're awake late at night today. What you up to?' "
-                "Maintain a helpful but dry tone."
-            )
+        await self.session.say(
+            "Greetings boss. Systems are online. What are you up to?"
         )
 
 
@@ -274,31 +165,23 @@ class FridayAgent(Agent):
 # LiveKit entry point
 # ---------------------------------------------------------------------------
 
-def _turn_detection() -> str:
-    return "stt" if STT_PROVIDER in ("sarvam", "deepgram") else "vad"
-
-
-def _endpointing_delay() -> float:
-    return {"deepgram": 0.05, "sarvam": 0.07, "whisper": 0.3}.get(STT_PROVIDER, 0.1)
-
-
 async def entrypoint(ctx: JobContext) -> None:
     logger.info(
         "FRIDAY online – room: %s | STT=%s | LLM=%s | TTS=%s",
         ctx.room.name, STT_PROVIDER, LLM_PROVIDER, TTS_PROVIDER,
     )
 
-    stt = _build_stt()
-    llm = _build_llm()
-    tts = _build_tts()
-
     session = AgentSession(
-        turn_detection=_turn_detection(),
-        min_endpointing_delay=_endpointing_delay(),
+        turn_detection="stt",
+        min_endpointing_delay=0.8,
     )
 
     await session.start(
-        agent=FridayAgent(stt=stt, llm=llm, tts=tts),
+        agent=FridayAgent(
+            stt=_build_stt(),
+            llm=_build_llm(),
+            tts=_build_tts(),
+        ),
         room=ctx.room,
     )
 
@@ -311,9 +194,7 @@ def main():
     cli.run_app(WorkerOptions(entrypoint_fnc=entrypoint))
 
 def dev():
-    """Wrapper to run the agent in dev mode automatically."""
     import sys
-    # If no command was provided, inject 'dev'
     if len(sys.argv) == 1:
         sys.argv.append("dev")
     main()

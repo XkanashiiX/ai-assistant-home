@@ -87,8 +87,59 @@ def register(mcp):
         return f"[stub] Search results for: {query}"
 
     @mcp.tool()
+    async def get_weather(location: str) -> str:
+        """
+        Get the current weather for any city or location.
+        Use when the user asks about weather, temperature, or conditions.
+        """
+        async with httpx.AsyncClient(follow_redirects=True, timeout=10) as client:
+            # Step 1: Geocode the location
+            geo = await client.get(
+                "https://geocoding-api.open-meteo.com/v1/search",
+                params={"name": location, "count": 1, "language": "en", "format": "json"}
+            )
+            geo_data = geo.json()
+            if not geo_data.get("results"):
+                return f"Couldn't find location: {location}"
+
+            result = geo_data["results"][0]
+            lat, lon = result["latitude"], result["longitude"]
+            name = result.get("name", location)
+            country = result.get("country", "")
+
+            # Step 2: Fetch current weather
+            weather = await client.get(
+                "https://api.open-meteo.com/v1/forecast",
+                params={
+                    "latitude": lat,
+                    "longitude": lon,
+                    "current": "temperature_2m,apparent_temperature,weathercode,windspeed_10m,relativehumidity_2m",
+                    "temperature_unit": "celsius",
+                    "windspeed_unit": "kmh",
+                }
+            )
+            w = weather.json().get("current", {})
+
+            code = w.get("weathercode", 0)
+            conditions = {
+                0: "Clear sky", 1: "Mainly clear", 2: "Partly cloudy", 3: "Overcast",
+                45: "Foggy", 48: "Icy fog", 51: "Light drizzle", 53: "Drizzle",
+                55: "Heavy drizzle", 61: "Light rain", 63: "Rain", 65: "Heavy rain",
+                71: "Light snow", 73: "Snow", 75: "Heavy snow", 80: "Rain showers",
+                81: "Heavy showers", 95: "Thunderstorm", 99: "Thunderstorm with hail",
+            }
+            condition = conditions.get(code, f"Code {code}")
+
+            return (
+                f"{name}, {country}: {condition}. "
+                f"Temperature: {w.get('temperature_2m')}°C (feels like {w.get('apparent_temperature')}°C). "
+                f"Wind: {w.get('windspeed_10m')} km/h. "
+                f"Humidity: {w.get('relativehumidity_2m')}%."
+            )
+
+    @mcp.tool()
     async def fetch_url(url: str) -> str:
-        """Fetch the raw text content of a URL."""
+        """Fetch the raw text content of a URL. Use only for reading page content, NOT for opening a browser."""
         async with httpx.AsyncClient(follow_redirects=True, timeout=10) as client:
             response = await client.get(url)
             response.raise_for_status()
