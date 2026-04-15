@@ -1,0 +1,32 @@
+      --host-header string               set Host header; if 'rewrite' use local address hostname
+      --inspect                          enable/disable http introspection (default true) (default <nil>)
+      --log string                       path to log file, 'stdout', 'stderr' or 'false' (default "false")
+      --log-format string                log record format: 'term', 'logfmt', 'json' (default "term")
+      --log-level string                 logging level: 'debug', 'info', 'warn', 'error', 'crit' (default "info")
+      --mutual-tls-cas string            path to TLS certificate authority to verify client certs in mutual tls
+      --oauth string                     enforce authentication oauth provider on tunnel endpoint, e.g. 'google'
+      --oauth-allow-domain strings       allow only oauth users with these email domains
+      --oauth-allow-email strings        allow only oauth users with these emails
+      --oauth-client-id string           oauth app client id, optional
+      --oauth-client-secret string       oauth app client secret, optional
+      --oauth-scope strings              request these oauth scopes when users authenticate
+      --oidc string                      oidc issuer url, e.g. https://accounts.google.com
+      --oidc-client-id string            oidc app client id
+      --oidc-client-secret string        oidc app client secret
+      --oidc-scope strings               request these oidc scopes when users authenticate
+      --proxy-proto string               version of proxy proto to use with this tunnel, empty if not using
+ngrok                                                                                                   (Ctrl+C to quit)
+
+LLMs 4x smaller, 2x faster: https://ngrok.com/blog/quantization
+
+Session Status                online
+Account                       kanashiipain@gmail.com (Plan: Free)
+Version                       3.37.6
+Region                        Europe (eu)
+Web Interface                 http://127.0.0.1:4040
+Forwarding                    https://gorged-vitamins-decimal.ngrok-free.dev -> http://localhost:8000
+                                                                                                                        Connections                   ttl     opn     rt1     rt5     p50     p90                                                                             0       0       0.00    0.00    0.00    0.00                                                                                                                                                                      
+
+
+
+
