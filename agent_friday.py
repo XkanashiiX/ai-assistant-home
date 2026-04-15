@@ -41,7 +41,8 @@ OPENAI_TTS_VOICE   = "nova"       # "nova" has a clean, confident female tone
 TTS_SPEED           = 1.15
 
 SARVAM_TTS_LANGUAGE = "en-IN"
-SARVAM_TTS_SPEAKER  = "rahul"
+SARVAM_TTS_MODEL    = "bulbul:v2"
+SARVAM_TTS_SPEAKER  = "karun"
 
 # MCP server running on Windows host
 MCP_SERVER_PORT = 8000
@@ -216,10 +217,10 @@ def _build_llm():
 
 def _build_tts():
     if TTS_PROVIDER == "sarvam":
-        logger.info("TTS → Sarvam Bulbul v3")
+        logger.info("TTS → Sarvam %s / %s", SARVAM_TTS_MODEL, SARVAM_TTS_SPEAKER)
         return sarvam.TTS(
             target_language_code=SARVAM_TTS_LANGUAGE,
-            model="bulbul:v3",
+            model=SARVAM_TTS_MODEL,
             speaker=SARVAM_TTS_SPEAKER,
             pace=TTS_SPEED,
         )
