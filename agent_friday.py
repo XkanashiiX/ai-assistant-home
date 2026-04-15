@@ -172,10 +172,7 @@ def _get_windows_host_ip() -> str:
     return "127.0.0.1"
 
 def _mcp_server_url() -> str:
-    # host_ip = _get_windows_host_ip()
-    # url = f"http://{host_ip}:{MCP_SERVER_PORT}/sse"
-    # url = f"https://ongoing-colleague-samba-pioneer.trycloudflare.com/sse"
-    url = f"http://127.0.0.1:{MCP_SERVER_PORT}/sse"
+    url = os.environ.get("MCP_SERVER_URL", f"http://127.0.0.1:{MCP_SERVER_PORT}/sse")
     logger.info("MCP Server URL: %s", url)
     return url
 
