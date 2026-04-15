@@ -51,3 +51,8 @@ externalPort = 80
 [deployment]
 deploymentTarget = "vm"
 run = ["uv", "run", "friday"]
+
+[userenv]
+
+[userenv.shared]
+MCP_SERVER_URL = "https://specials-supplied-speech-stuff.trycloudflare.com/sse"
