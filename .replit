@@ -55,4 +55,4 @@ run = ["uv", "run", "friday"]
 [userenv]
 
 [userenv.shared]
-MCP_SERVER_URL = "https://specials-supplied-speech-stuff.trycloudflare.com/sse"
+MCP_SERVER_URL = "https://closely-encryption-passive-finest.trycloudflare.com/sse"
