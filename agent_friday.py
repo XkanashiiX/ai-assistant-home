@@ -34,7 +34,7 @@ TTS_PROVIDER       = "deepgram"
 
 GEMINI_LLM_MODEL   = "gemini-2.0-flash"
 OPENAI_LLM_MODEL   = "gpt-4o"
-GROQ_LLM_MODEL     = "llama-3.3-70b-versatile"
+GROQ_LLM_MODEL     = "llama-3.1-8b-instant"
 
 OPENAI_TTS_MODEL   = "tts-1"
 OPENAI_TTS_VOICE   = "nova"       # "nova" has a clean, confident female tone
@@ -255,7 +255,7 @@ class FridayAgent(Agent):
                 mcp.MCPServerHTTP(
                     url=_mcp_server_url(),
                     transport_type="sse",
-                    client_session_timeout_seconds=30,
+                    client_session_timeout_seconds=8,
                 ),
             ],
         )
